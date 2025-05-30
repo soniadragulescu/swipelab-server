@@ -1,0 +1,183 @@
+@SwipeLab_HostAddress = https://localhost:7016
+@swipeCount = 10
+@randomSeed = {{$timestamp}}
+
+### --------------------------
+### 1. EXPERIMENT SETUP
+### --------------------------
+
+### Create New Experiment
+# @name createExperiment
+POST {{SwipeLab_HostAddress}}/experiment/new
+Content-Type: application/json
+
+{
+  "dateOfBirth": "1990-01-15",
+  "gender": 1,
+  "interestedIn": 0,
+  "minAge": 25,
+  "maxAge": 35,
+  "height": 180,
+  "ethnicity": "Caucasian",
+  "countryOfResidency": "United States",
+  "usageOfDatingApps": 1,
+  "knownDatingApps": [1, 2]
+}
+
+> {%
+    client.global.set("experimentId", response.body.experimentId);
+    client.global.set("datingProfileSetId", response.body.datingProfileSetId);
+%}
+
+### Get Dating Profile Set
+# @name getProfileSet
+GET {{SwipeLab_HostAddress}}/profiles/set/{{datingProfileSetId}}
+Content-Type: application/json
+
+> {%
+    client.global.set("profileIds", response.body.datingProfiles.map(p => p.datingProfileId));
+%}
+
+### --------------------------
+### 2. SWIPING FLOW (8 profiles)
+### --------------------------
+
+### Swipe on Profile 1 (Like)
+# @name swipe1
+POST {{SwipeLab_HostAddress}}/profiles/{{profileIds[0]}}/swipe
+Content-Type: application/json
+
+{"swipeState": 1}
+
+### Swipe on Profile 2 (Dislike)
+# @name swipe2
+POST {{SwipeLab_HostAddress}}/profiles/{{profileIds[1]}}/swipe
+Content-Type: application/json
+
+{"swipeState": 0}
+
+### Swipe on Profile 3 (Like)
+# @name swipe3
+POST {{SwipeLab_HostAddress}}/profiles/{{profileIds[2]}}/swipe
+Content-Type: application/json
+
+{"swipeState": 1}
+
+### Swipe on Profile 4 (Dislike)
+# @name swipe4
+POST {{SwipeLab_HostAddress}}/profiles/{{profileIds[3]}}/swipe
+Content-Type: application/json
+
+{"swipeState": 0}
+
+### Swipe on Profile 5 (Like)
+# @name swipe5
+POST {{SwipeLab_HostAddress}}/profiles/{{profileIds[4]}}/swipe
+Content-Type: application/json
+
+{"swipeState": 1}
+
+### Get Reflection Prompts
+# @name getPrompts
+GET {{SwipeLab_HostAddress}}/feedback/prompts/{{experimentId}}
+Content-Type: application/json
+
+> {%
+    client.global.set("prompts", response.body.prompts);
+%}
+
+### Reflect on Profile 5
+POST {{SwipeLab_HostAddress}}/profiles/{{profileIds[4]}}/reflect
+Content-Type: application/json
+
+{
+  "changedOpinion": false,
+  "promptAnswers": {
+    "{{prompts[0]}}": "I liked their profile picture",
+    "{{prompts[1]}}": "No, I stand by my decision"
+  }
+}
+
+### Swipe on Profile 6 (Dislike)
+# @name swipe6
+POST {{SwipeLab_HostAddress}}/profiles/{{profileIds[5]}}/swipe
+Content-Type: application/json
+
+{"swipeState": 0}
+
+### Get Reflection Prompts
+# @name getPrompts
+GET {{SwipeLab_HostAddress}}/feedback/prompts/{{experimentId}}
+Content-Type: application/json
+
+> {%
+    client.global.set("prompts", response.body.prompts);
+%}
+
+### Reflect on Profile 6
+POST {{SwipeLab_HostAddress}}/profiles/{{profileIds[5]}}/reflect
+Content-Type: application/json
+
+{
+  "changedOpinion": true,
+  "promptAnswers": {
+    "{{prompts[0]}}": "Not enough common interests",
+    "{{prompts[1]}}": "Maybe with more information"
+  }
+}
+
+### Swipe on Profile 7 (Like)
+# @name swipe7
+POST {{SwipeLab_HostAddress}}/profiles/{{profileIds[6]}}/swipe
+Content-Type: application/json
+
+{"swipeState": 1}
+
+### Get Reflection Prompts
+# @name getPrompts
+GET {{SwipeLab_HostAddress}}/feedback/prompts/{{experimentId}}
+Content-Type: application/json
+
+> {%
+    client.global.set("prompts", response.body.prompts);
+%}
+
+### Reflect on Profile 7
+POST {{SwipeLab_HostAddress}}/profiles/{{profileIds[6]}}/reflect
+Content-Type: application/json
+
+{
+  "changedOpinion": false,
+  "promptAnswers": {
+    "{{prompts[0]}}": "Great sense of humor",
+    "{{prompts[1]}}": "Definitely not"
+  }
+}
+
+### Swipe on Profile 8 (Dislike)
+# @name swipe8
+POST {{SwipeLab_HostAddress}}/profiles/{{profileIds[7]}}/swipe
+Content-Type: application/json
+
+{"swipeState": 0}
+
+### Get Reflection Prompts
+# @name getPrompts
+GET {{SwipeLab_HostAddress}}/feedback/prompts/{{experimentId}}
+Content-Type: application/json
+
+> {%
+    client.global.set("prompts", response.body.prompts);
+%}
+
+### Reflect on Profile 8
+POST {{SwipeLab_HostAddress}}/profiles/{{profileIds[7]}}/reflect
+Content-Type: application/json
+
+{
+  "changedOpinion": false,
+  "promptAnswers": {
+    "{{prompts[0]}}": "Too far away",
+    "{{prompts[1]}}": "Only if location changes"
+  }
+}

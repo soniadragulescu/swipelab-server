@@ -1,0 +1,192 @@
+@SwipeLab_HostAddress = https://localhost:7016
+@experimentId = 
+@datingProfileSetId = 
+@profileId = 
+@datingProfileId = 
+@swipeCount = 10
+@randomSeed = {{$timestamp}}
+@swipeState = 
+@changedOpinion = true
+
+### --------------------------
+### 1. ENDPOINT DEFINITIONS (Original + New)
+### --------------------------
+
+### [Experiment] Create New Experiment
+# @name createExperiment
+POST {{SwipeLab_HostAddress}}/experiment/new
+Content-Type: application/json
+
+{
+  "dateOfBirth": "1990-01-15",
+  "gender": 1,
+  "interestedIn": 2,
+  "minAge": 25,
+  "maxAge": 35,
+  "height": 180,
+  "ethnicity": "Caucasian",
+  "countryOfResidency": "United States",
+  "usageOfDatingApps": 1,
+  "knownDatingApps": [1, 2]
+}
+
+### [Experiment] Get Existing Experiment
+# @name getExperiment
+GET {{SwipeLab_HostAddress}}/experiment/{{experimentId}}
+Content-Type: application/json
+
+### [Experiment] Get Experiment Results
+# @name getResults
+GET {{SwipeLab_HostAddress}}/experiment/{{experimentId}}/results
+Content-Type: application/json
+
+### [Profiles] Get Dating Profile Set
+# @name getProfileSet
+GET {{SwipeLab_HostAddress}}/profiles/set/{{datingProfileSetId}}
+Content-Type: application/json
+
+### [Profiles] Swipe on Profile
+# @name swipeProfile
+POST {{SwipeLab_HostAddress}}/profiles/{{profileId}}/swipe
+Content-Type: application/json
+
+{
+  "swipeState": {{swipeState}}
+}
+
+### [Profiles] Register Profile Reflection
+# @name reflectProfile
+POST {{SwipeLab_HostAddress}}/profiles/{{datingProfileId}}/reflect
+Content-Type: application/json
+
+{
+  "changedOpinion": {{changedOpinion}},
+  "promptAnswers": {{promptAnswers}}
+}
+
+### [Feedback] Get Experiment Prompts
+# @name getExperimentPrompts
+GET {{SwipeLab_HostAddress}}/feedback/prompts/{{experimentId}}
+Content-Type: application/json
+
+### --------------------------
+### 2. HELPER REQUESTS (Maintained)
+### --------------------------
+
+### [Helper] Set Random Seed
+# @name setRandomSeed
+POST {{SwipeLab_HostAddress}}/noop
+Content-Type: application/json
+
+{
+  "seed": "{{randomSeed}}"
+}
+
+> {%
+    client.test("Random seed set", () => {
+        client.assert(true, "Random seed initialized");
+    });
+%}
+
+### [Helper] Initialize Flow Variables
+# @name initFlow
+POST {{SwipeLab_HostAddress}}/noop
+Content-Type: application/json
+
+{}
+
+### --------------------------
+### 3. COMPLETE EXPERIMENT FLOW (New)
+### --------------------------
+
+### [Flow] Complete Experiment Flow with Reflections
+# @name completeExperimentFlow
+POST {{SwipeLab_HostAddress}}/noop
+Content-Type: application/json
+
+> {%
+    // Initialize
+    await client.sendRequest("setRandomSeed");
+    await client.sendRequest("initFlow");
+
+    // 1. Create new experiment
+    const createResponse = await client.sendRequest("createExperiment");
+    client.test("Create Experiment - Success", () => {
+        client.assert(createResponse.status === 201, "Expected 201 Created");
+        client.global.set("experimentId", createResponse.body.experimentId);
+        client.global.set("datingProfileSetId", createResponse.body.datingProfileSetId);
+    });
+
+    // 2. Get profile set
+    const profileSetResponse = await client.sendRequest("getProfileSet");
+    client.test("Get Profile Set - Success", () => {
+        client.assert(profileSetResponse.status === 200, "Expected 200 OK");
+        const profiles = profileSetResponse.body.datingProfiles;
+        client.global.set("profileIds", profiles.map(p => p.datingProfileId));
+        client.log(`Found ${profiles.length} profiles`);
+    });
+
+    // 4. Swipe first half (simple swipes)
+    for (let i = 0; i < Math.min(halfWayIndex, client.global.get("swipeCount")); i++) {
+        const swipeState = random.nextBoolean() ? 1 : 0;
+        client.global.set("profileId", profileIds[i]);
+        client.global.set("swipeState", swipeState);
+
+        const swipeResponse = await client.sendRequest("swipeProfile");
+        client.test(`Swipe ${i+1}/${profileIds.length} (${swipeState === 1 ? 'Like' : 'Dislike'}) - Success`, () => {
+            client.assert(swipeResponse.status === 200, "Expected 200 OK");
+        });
+    }
+
+    // 5. Swipe second half (with reflections)
+    for (let i = halfWayIndex; i < Math.min(profileIds.length, client.global.get("swipeCount")); i++) {
+        // Perform swipe
+        const swipeState = random.nextBoolean() ? 1 : 0;
+        client.global.set("profileId", profileIds[i]);
+        client.global.set("swipeState", swipeState);
+        client.global.set("datingProfileId", profileIds[i]);
+
+        const swipeResponse = await client.sendRequest("swipeProfile");
+        client.test(`Swipe ${i+1}/${profileIds.length} (${swipeState === 1 ? 'Like' : 'Dislike'}) - Success`, () => {
+            client.assert(swipeResponse.status === 200, "Expected 200 OK");
+        });
+
+        //Get prompts for reflection
+        const promptsResponse = await client.sendRequest("getExperimentPrompts");
+        client.test("Get Experiment Prompts - Success", () => {
+            client.assert(promptsResponse.status === 200, "Expected 200 OK");
+            client.global.set("prompts", promptsResponse.body.prompts);
+        });
+
+        const profileIds = client.global.get("profileIds") || [];
+        const prompts = client.global.get("prompts") || [];
+        const halfWayIndex = Math.floor(profileIds.length / 2);
+        const random = new Random(client.global.get("randomSeed"));
+
+        // Create reflection using prompts
+        const promptAnswers = {};
+        prompts.forEach(prompt => {
+            promptAnswers[prompt] = `Reflection on ${prompt.toLowerCase()}`;
+        });
+
+        client.global.set("changedOpinion", random.nextBoolean());
+        client.global.set("promptAnswers", JSON.stringify(promptAnswers));
+
+        const reflectResponse = await client.sendRequest("reflectProfile");
+        client.test(`Reflection ${i+1-halfWayIndex} - Success`, () => {
+            client.assert(reflectResponse.status === 204, "Expected 204 No Content");
+        });
+    }
+%}
+
+### --------------------------
+### 4. EXECUTION CONTROLS
+### --------------------------
+
+### [Execute] Complete Experiment Flow
+POST {{SwipeLab_HostAddress}}/noop
+Content-Type: application/json
+
+{
+  "flow": "completeExperimentFlow"
+}

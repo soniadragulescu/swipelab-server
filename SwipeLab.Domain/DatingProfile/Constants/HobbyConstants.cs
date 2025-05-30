@@ -1,0 +1,53 @@
+namespace SwipeLab.Domain.DatingProfile.Constants;
+
+public static class HobbyConstants
+{
+    public static readonly HashSet<string> AllHobbies =
+    [
+        "Sports and fitness",
+        "Music and concerts",
+        "Travel and adventure",
+        "Arts and crafts",
+        "Pets and animals",
+        "Movies and TV shows",
+        "Video games",
+        "Reading",
+        "Cooking",
+        "Fashion",
+        "Dancing",
+        "Photography",
+        "Hiking",
+        "Yoga and meditation",
+        "Writing and journaling",
+        "Board games and card games",
+        "Fishing",
+        "Gardening",
+        "Cycling",
+        "Karaoke",
+        "Painting and drawing",
+        "Volunteering",
+        "Skateboarding",
+        "Camping",
+        "Snowboarding",
+        "Rock climbing",
+        "Sailing",
+        "Skiing",
+        "Surfing",
+        "Wine tasting",
+        "Coffee brewing and cafe hopping",
+        "Learning new languages",
+        "Martial arts",
+        "Podcast listening",
+        "Interior decorating",
+        "Robotics",
+        "Astrology and tarot",
+        "Stand-up comedy",
+        "Magic and illusion",
+        "Vintage shopping",
+        "Harry Potter",
+        "Lord of the rings",
+        "Star Wars",
+        "Marvel",
+        "Anime and manga"
+    ];
+}

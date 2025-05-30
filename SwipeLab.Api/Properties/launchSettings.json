@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:19584",
+      "sslPort": 44319
+    }
+  },
+  "profiles": {
+    "SwipeLab": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Local",
+        "CORECLR_ENABLE_PROFILING": "1",
+        "CORECLR_PROFILER": "{<coreclr-profiler>}",
+        "CORECLR_PROFILER_PATH": ".\\bin\\Debug\\net8.0\\newrelic\\NewRelic.Profiler.dll",
+        "CORECLR_NEWRELIC_HOME": ".\\bin\\Debug\\net8.0\\newrelic",
+        "NEW_RELIC_LICENSE_KEY": "<new-relic-license-key>",
+        "NEW_RELIC_APP_NAME": "<new-relic-app-name>"
+      }
+    },
+    "http": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:5045"
+    },
+    "https": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "CORECLR_ENABLE_PROFILING": "1",
+        "CORECLR_PROFILER": "{<coreclr-profiler>}",
+        "CORECLR_PROFILER_PATH": ".\\bin\\Debug\\net8.0\\newrelic\\NewRelic.Profiler.dll",
+        "CORECLR_NEWRELIC_HOME": ".\\bin\\Debug\\net8.0\\newrelic",
+        "NEW_RELIC_LICENSE_KEY": "<new-relic-license-key>",
+        "NEW_RELIC_APP_NAME": "<new-relic-app-name>"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "https://localhost:7016;http://localhost:5045"
+    },
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
+      "environmentVariables": {
+        "ASPNETCORE_HTTPS_PORTS": "8081",
+        "ASPNETCORE_HTTP_PORTS": "8080",
+        "CORECLR_ENABLE_PROFILING": "1",
+        "CORECLR_PROFILER": "{<coreclr-profiler>}",
+        "CORECLR_PROFILER_PATH": ".\\bin\\Debug\\net8.0\\newrelic\\NewRelic.Profiler.dll",
+        "CORECLR_NEWRELIC_HOME": ".\\bin\\Debug\\net8.0\\newrelic",
+        "NEW_RELIC_LICENSE_KEY": "<new-relic-license-key>",
+        "NEW_RELIC_APP_NAME": "<new-relic-app-name>"
+      },
+      "publishAllPorts": true,
+      "useSSL": true
+    }
+  }
+}

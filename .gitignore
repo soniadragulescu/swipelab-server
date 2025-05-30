@@ -23,6 +23,20 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+bin/
+obj/
+*.swp
+.vs/
+.idea/
+data/*
+
 # .NET Core
 project.lock.json
 project.fragment.lock.json
